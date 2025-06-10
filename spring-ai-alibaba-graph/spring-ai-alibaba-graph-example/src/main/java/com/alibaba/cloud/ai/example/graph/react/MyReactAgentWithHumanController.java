@@ -20,9 +20,9 @@ import com.alibaba.cloud.ai.graph.OverAllState;
 import com.alibaba.cloud.ai.graph.RunnableConfig;
 import com.alibaba.cloud.ai.graph.state.StateSnapshot;
 import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.messaging.Message;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,7 +44,8 @@ public class MyReactAgentWithHumanController {
     @GetMapping("/chat")
     public String simpleChat(String query) {
         RunnableConfig runnableConfig = RunnableConfig.builder().threadId("1").build();
-        Optional<OverAllState> result = myReactAgentGraph.invoke(Map.of("messages", new UserMessage(query)), runnableConfig);
+        List<Message> list = List.of(new UserMessage(query));
+        Optional<OverAllState> result = myReactAgentGraph.invoke(Map.of("messages", list), runnableConfig);
         List<Message> messages = (List<Message>) result.get().value("messages").get();
         AssistantMessage assistantMessage = (AssistantMessage) messages.get(messages.size() - 1);
 //		AssistantMessage assistantMessage = (AssistantMessage) result.get().value("messages").get();
@@ -89,6 +90,7 @@ public class MyReactAgentWithHumanController {
         state.withResume();
         state.withHumanFeedback(new OverAllState.HumanFeedback(Map.of(), nextNode));
 
+//        Optional<OverAllState> result = myReactAgentGraph.resume(state.humanFeedback(), runnableConfig);
         Optional<OverAllState> result = myReactAgentGraph.invoke(state, runnableConfig);
         // send back to user and wait for plan approval
 

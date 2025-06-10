@@ -31,6 +31,7 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.tool.resolution.ToolCallbackResolver;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -42,9 +43,10 @@ import org.springframework.web.client.RestClient;
 public class ReactAutoconfiguration {
 
 	@Bean
-	public ReactAgent normalReactAgent(ChatModel chatModel, ToolCallbackResolver resolver) throws GraphStateException {
+	public ReactAgent normalReactAgent(ChatModel chatModel, ToolCallbackResolver resolver, ToolCallbackProvider toolCallbackProvider) throws GraphStateException {
 		ChatClient chatClient = ChatClient.builder(chatModel)
-			.defaultToolNames("getWeatherFunction")
+//			.defaultToolNames("getWeatherFunction")
+				.defaultToolCallbacks(toolCallbackProvider)
 			.defaultAdvisors(new SimpleLoggerAdvisor())
 			.defaultOptions(OpenAiChatOptions.builder().internalToolExecutionEnabled(false).build())
 			.build();
