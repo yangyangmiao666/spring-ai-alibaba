@@ -26,11 +26,17 @@ import com.google.gson.reflect.TypeToken;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.ai.document.Document;
-import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
-import java.util.function.BiFunction;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -99,7 +105,13 @@ public abstract class BaseSchemaService {
 
 		// 最终组装 SchemaDTO
 		schemaDTO.setTable(tableList);
-		schemaDTO.setForeignKeys(List.of(new ArrayList<>(foreignKeySet)));
+
+		Set<String> foreignKeys = tableDocuments.stream()
+			.map(doc -> (String) doc.getMetadata().getOrDefault("foreignKey", ""))
+			.flatMap(fk -> Arrays.stream(fk.split("、")))
+			.filter(StringUtils::isNotBlank)
+			.collect(Collectors.toSet());
+		schemaDTO.setForeignKeys(List.of(new ArrayList<>(foreignKeys)));
 
 		return schemaDTO;
 	}
