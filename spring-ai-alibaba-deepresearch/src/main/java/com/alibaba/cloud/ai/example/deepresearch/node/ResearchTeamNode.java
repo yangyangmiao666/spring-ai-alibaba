@@ -23,51 +23,43 @@ import com.alibaba.cloud.ai.graph.action.NodeAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author yingzi
- * @since 2025/5/18 16:59
+ * @author sixiyida
+ * @since 2025/6/12 09:14
  */
 
 public class ResearchTeamNode implements NodeAction {
 
 	private static final Logger logger = LoggerFactory.getLogger(ResearchTeamNode.class);
 
+	private static final long TIME_SLEEP = 10000;
+
 	@Override
 	public Map<String, Object> apply(OverAllState state) throws Exception {
+		// 智能等待：根据是否有反思任务调整等待时间
+		if (state.value("research_team_next_node").isPresent()) {
+			Plan curPlan = StateUtil.getPlan(state);
+			if (hasActiveReflectionTasks(curPlan)) {
+				Thread.sleep(5000);
+				logger.debug("decline waiting time for reflection tasks");
+			}
+			else {
+				Thread.sleep(TIME_SLEEP);
+			}
+		}
+
 		logger.info("research_team node is running.");
 		String nextStep = "reporter";
 		Map<String, Object> updated = new HashMap<>();
 
 		Plan curPlan = StateUtil.getPlan(state);
 		// 判断steps里的每个step都有执行结果
-		if (areAllExecutionResultsPresent(curPlan)) {
-			updated.put("research_team_next_node", nextStep);
-			logger.info("research_team node -> {} node", nextStep);
-			return updated;
-		}
-
-		// todo 异步 + 并行执行Step
-		for (Plan.Step step : curPlan.getSteps()) {
-			if (StringUtils.hasText(step.getExecutionRes())) {
-				continue;
-			}
-			if (step.getStepType() == Plan.StepType.RESEARCH) {
-				nextStep = "researcher";
-				updated.put("research_team_next_node", nextStep);
-				logger.info("research_team node -> {} node", nextStep);
-				return updated;
-			}
-			else if (step.getStepType() == Plan.StepType.PROCESSING) {
-				nextStep = "coder";
-				updated.put("research_team_next_node", nextStep);
-				logger.info("research_team node -> {} node", nextStep);
-				return updated;
-			}
+		if (!areAllExecutionResultsPresent(curPlan)) {
+			nextStep = "parallel_executor";
 		}
 		updated.put("research_team_next_node", nextStep);
 		logger.info("research_team node -> {} node", nextStep);
@@ -79,7 +71,25 @@ public class ResearchTeamNode implements NodeAction {
 			return false;
 		}
 
-		return plan.getSteps().stream().allMatch(step -> StringUtils.hasLength(step.getExecutionRes()));
+		return plan.getSteps()
+			.stream()
+			.allMatch(step -> step.getExecutionStatus() != null
+					&& step.getExecutionStatus().startsWith(StateUtil.EXECUTION_STATUS_COMPLETED_PREFIX));
+	}
+
+	/**
+	 * 检查是否有活跃的反思任务
+	 */
+	private boolean hasActiveReflectionTasks(Plan plan) {
+		if (CollectionUtils.isEmpty(plan.getSteps())) {
+			return false;
+		}
+
+		return plan.getSteps()
+			.stream()
+			.anyMatch(step -> step.getExecutionStatus() != null
+					&& (step.getExecutionStatus().contains("waiting_reflecting")
+							|| step.getExecutionStatus().contains("waiting_processing")));
 	}
 
 }

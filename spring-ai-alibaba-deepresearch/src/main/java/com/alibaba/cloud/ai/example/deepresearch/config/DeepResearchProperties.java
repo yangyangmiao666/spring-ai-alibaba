@@ -16,15 +16,71 @@
 
 package com.alibaba.cloud.ai.example.deepresearch.config;
 
+import com.alibaba.cloud.ai.toolcalling.searches.SearchEnum;
+import com.google.common.collect.Maps;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
- * @author Allen Hu
- * @since 2025/5/24
+ * @author sixiyida
+ * @since 2025/6/14
  */
 @ConfigurationProperties(prefix = DeepResearchProperties.PREFIX)
 public class DeepResearchProperties {
 
-	public static final String PREFIX = "spring.ai.alibaba.deepreserch";
+	public static final String PREFIX = "spring.ai.alibaba.deepresearch";
+
+	/**
+	 * Parallel node count, key=node name, value=node count
+	 */
+	private Map<String, Integer> parallelNodeCount = new HashMap<>();
+
+	/**
+	 * McpClient mapping for Agent name. key=Agent name, value=McpClient Name
+	 */
+	private Map<String, Set<String>> mcpClientMapping = Maps.newHashMap();
+
+	/**
+	 * 图执行的最大迭代次数
+	 */
+	private int maxIterations = 50;
+
+	public Map<String, Integer> getParallelNodeCount() {
+		return parallelNodeCount;
+	}
+
+	public void setParallelNodeCount(Map<String, Integer> parallelNodeCount) {
+		this.parallelNodeCount = parallelNodeCount;
+	}
+
+	public Map<String, Set<String>> getMcpClientMapping() {
+		return mcpClientMapping;
+	}
+
+	public void setMcpClientMapping(Map<String, Set<String>> mcpClientMapping) {
+		this.mcpClientMapping = mcpClientMapping;
+	}
+
+	public int getMaxIterations() {
+		return maxIterations;
+	}
+
+	public void setMaxIterations(int maxIterations) {
+		this.maxIterations = maxIterations;
+	}
+
+	private List<SearchEnum> searchList = List.of();
+
+	public List<SearchEnum> getSearchList() {
+		return searchList;
+	}
+
+	public void setSearchList(List<SearchEnum> searchList) {
+		this.searchList = searchList;
+	}
 
 }

@@ -50,11 +50,11 @@ To quickly get started with Spring AI Alibaba, add 'spring-ai-alibaba-starter-da
 </dependencies>
 ```
 
-Please check Quick Start on our official website to learn more details. More starters include `spring-ai-alibaba-graph-core`, `spring-ai-alibaba-starter-nl2sql`,`spring-ai-alibaba-starter-nacos-mcp-client`, etc, please refer to the official website documentation.
+Please check [Quick Start](https://java2ai.com/docs/1.0.0.2/get-started/chatbot) on our official website to learn more details. More starters include `spring-ai-alibaba-graph-core`, `spring-ai-alibaba-starter-nl2sql`,`spring-ai-alibaba-starter-nacos-mcp-client`, etc, please refer to the official website documentation.
 
 > NOTE!
 > 1. Requires JDK 17+.
-> 2. If there are any `spring-ai` dependency issue, please lean how to configure the `spring-milestones` Maven repository,you can quickly start and check the official website.
+> 2. If there are any `spring-ai` dependency issue, please lean how to configure the `spring-milestones` Maven repository on [FAQ page](https://java2ai.com/docs/1.0.0.2/faq).
 
 ### Playground and Example
 
@@ -124,12 +124,10 @@ Alibaba.
 
 ## Contact Us
 
-* Dingtalk Group (钉钉群), search `124010006813` and join.
+* Dingtalk Group (钉钉群), search `94405033092` and join.
 * WeChat Group (微信公众号), scan the QR code below and follow us.
 
-<p align="center">
-    <img src="./docs/imgs/wechat-account.png" alt="Deep Research" style="max-width: 400px; height: 400px">
-</p>
+<img src="./docs/imgs/wechat-account.png" alt="Deep Research" style="max-width: 200px; height: 200px;">
 
 ## Credits
 

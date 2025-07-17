@@ -18,7 +18,6 @@ package com.alibaba.cloud.ai.graph;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
@@ -101,7 +100,6 @@ public final class RunnableConfig implements HasMetadata<RunnableConfig.Builder>
 			return this;
 		}
 		return RunnableConfig.builder(this).checkPointId(checkPointId).build();
-
 	}
 
 	/**

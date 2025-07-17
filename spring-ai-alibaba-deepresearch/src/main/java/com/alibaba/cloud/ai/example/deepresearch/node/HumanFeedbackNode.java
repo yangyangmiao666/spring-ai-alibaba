@@ -19,7 +19,6 @@ package com.alibaba.cloud.ai.example.deepresearch.node;
 import com.alibaba.cloud.ai.example.deepresearch.util.StateUtil;
 import com.alibaba.cloud.ai.graph.OverAllState;
 import com.alibaba.cloud.ai.graph.action.NodeAction;
-import com.alibaba.cloud.ai.graph.exception.GraphInterruptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -42,7 +41,18 @@ public class HumanFeedbackNode implements NodeAction {
 		String nextStep = "research_team";
 		Map<String, Object> updated = new HashMap<>();
 
-		// auto_accepted、yes、no 迭代次数都+1
+		// check the Maximum number of iterations
+		int planIterations = StateUtil.getPlanIterations(state);
+		int maxPlanIterations = StateUtil.getPlanMaxIterations(state);
+		if (planIterations >= maxPlanIterations) {
+			logger.info("Maximum number of iterations exceeded, planIterations:{}, maxPlanIterations:{}",
+					planIterations, maxPlanIterations);
+			logger.info("human_feedback node -> {} node", nextStep);
+			updated.put("human_next_node", nextStep);
+			return updated;
+		}
+
+		// iterations+1
 		updated.put("plan_iterations", StateUtil.getPlanIterations(state) + 1);
 
 		Map<String, Object> feedBackData = state.humanFeedback().data();

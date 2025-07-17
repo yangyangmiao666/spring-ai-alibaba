@@ -18,6 +18,7 @@ package com.alibaba.cloud.ai.graph.node;
 import com.alibaba.cloud.ai.graph.OverAllState;
 import com.alibaba.cloud.ai.graph.action.NodeAction;
 import com.alibaba.cloud.ai.graph.streaming.StreamingChatGenerator;
+import java.util.Optional;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.messages.Message;
@@ -27,7 +28,11 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class LlmNode implements NodeAction {
 
@@ -85,7 +90,7 @@ public class LlmNode implements NodeAction {
 				.startingNode("llmNode")
 				.startingState(state)
 				.mapResult(response -> Map.of(StringUtils.hasLength(this.outputKey) ? this.outputKey : "messages",
-						Objects.requireNonNull(response.getResult().getOutput().getText())))
+						Objects.requireNonNull(response.getResult().getOutput())))
 				.build(chatResponseFlux);
 			return Map.of(StringUtils.hasLength(this.outputKey) ? this.outputKey : "messages", generator);
 		}
@@ -111,6 +116,22 @@ public class LlmNode implements NodeAction {
 		if (StringUtils.hasLength(paramsKey)) {
 			this.params = (Map<String, Object>) state.value(paramsKey).orElse(this.params);
 		}
+		// Used for adapting the dify's DSL conversion
+		if (!this.params.isEmpty()) {
+			Map<String, Object> rawParams = this.params;
+			Map<String, Object> filledParams = new HashMap<>();
+			for (Map.Entry<String, Object> entry : rawParams.entrySet()) {
+				if (entry.getValue().equals("null")) {
+					Optional<Object> valueFromState = state.value(entry.getKey());
+					filledParams.put(entry.getKey(), valueFromState.orElse(entry.getValue()));
+				}
+				else {
+					filledParams.put(entry.getKey(), entry.getValue());
+				}
+			}
+
+			this.params = filledParams;
+		}
 		if (StringUtils.hasLength(messagesKey)) {
 			this.messages = (List<Message>) state.value(messagesKey).orElse(this.messages);
 		}
@@ -125,6 +146,15 @@ public class LlmNode implements NodeAction {
 	}
 
 	public Flux<ChatResponse> stream() {
+
+		if (StringUtils.hasLength(userPrompt) && !params.isEmpty()) {
+			userPrompt = renderPromptTemplate(userPrompt, params);
+		}
+
+		if (StringUtils.hasLength(systemPrompt) && !params.isEmpty()) {
+			systemPrompt = renderPromptTemplate(systemPrompt, params);
+		}
+
 		if (StringUtils.hasLength(systemPrompt) && StringUtils.hasLength(userPrompt)) {
 			return chatClient.prompt()
 				.system(systemPrompt)
@@ -166,6 +196,13 @@ public class LlmNode implements NodeAction {
 	}
 
 	public ChatResponse call() {
+		if (StringUtils.hasLength(userPrompt) && !params.isEmpty()) {
+			userPrompt = renderPromptTemplate(userPrompt, params);
+		}
+
+		if (StringUtils.hasLength(systemPrompt) && !params.isEmpty()) {
+			systemPrompt = renderPromptTemplate(systemPrompt, params);
+		}
 
 		if (StringUtils.hasLength(systemPrompt) && StringUtils.hasLength(userPrompt)) {
 			return chatClient.prompt()

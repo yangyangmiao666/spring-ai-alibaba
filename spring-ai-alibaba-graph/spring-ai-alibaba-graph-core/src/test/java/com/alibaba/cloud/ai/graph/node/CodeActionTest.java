@@ -17,9 +17,7 @@ package com.alibaba.cloud.ai.graph.node;
 
 import com.alibaba.cloud.ai.graph.OverAllState;
 import com.alibaba.cloud.ai.graph.action.NodeAction;
-import com.alibaba.cloud.ai.graph.node.code.CodeExecutor;
 import com.alibaba.cloud.ai.graph.node.code.CodeExecutorNodeAction;
-import com.alibaba.cloud.ai.graph.node.code.DockerCodeExecutor;
 import com.alibaba.cloud.ai.graph.node.code.LocalCommandlineCodeExecutor;
 import com.alibaba.cloud.ai.graph.node.code.entity.CodeExecutionConfig;
 import org.junit.jupiter.api.BeforeEach;
@@ -112,6 +110,7 @@ public class CodeActionTest {
 			.codeLanguage("java")
 			.config(config)
 			.params(params)
+			.outputKey("codeNode1_output")
 			.build();
 
 		// Prepare input data
@@ -122,12 +121,13 @@ public class CodeActionTest {
 
 		// Execute code
 		Map<String, Object> result = codeNode.apply(mockState);
+		Map codeNode1Output = (Map<String, String>) result.get("codeNode1_output");
 
 		// Verify results
 		assertNotNull(result);
-		assertEquals("Hello Hello Hello", result.get("repeated_text"));
-		assertEquals(18, result.get("length"));
-		assertEquals(3, result.get("count"));
+		assertEquals("Hello Hello Hello", codeNode1Output.get("repeated_text"));
+		assertEquals(18, codeNode1Output.get("length"));
+		assertEquals(3, codeNode1Output.get("count"));
 	}
 
 }
