@@ -18,6 +18,7 @@ package com.alibaba.cloud.ai.example.graph.react;
 import com.alibaba.cloud.ai.graph.CompiledGraph;
 import com.alibaba.cloud.ai.graph.OverAllState;
 import com.alibaba.cloud.ai.graph.RunnableConfig;
+import com.alibaba.cloud.ai.graph.exception.GraphRunnerException;
 import com.alibaba.cloud.ai.graph.state.StateSnapshot;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -42,7 +43,7 @@ public class MyReactAgentWithHumanController {
     }
 
     @GetMapping("/chat")
-    public String simpleChat(String query) {
+    public String simpleChat(String query) throws GraphRunnerException {
         RunnableConfig runnableConfig = RunnableConfig.builder().threadId("1").build();
         List<Message> list = List.of(new UserMessage(query));
         Optional<OverAllState> result = myReactAgentGraph.invoke(Map.of("messages", list), runnableConfig);
@@ -53,7 +54,7 @@ public class MyReactAgentWithHumanController {
     }
 
     @GetMapping("/confirm")
-    public String confirm() {
+    public String confirm() throws GraphRunnerException {
         String nextNode = "tool";
         RunnableConfig runnableConfig = RunnableConfig.builder().threadId("1").build();
 
@@ -80,7 +81,7 @@ public class MyReactAgentWithHumanController {
     }
 
     @GetMapping("/resume")
-    public String resume() {
+    public String resume() throws GraphRunnerException {
         RunnableConfig runnableConfig = RunnableConfig.builder().threadId("1").build();
 
         StateSnapshot stateSnapshot = myReactAgentGraph.getState(runnableConfig);
